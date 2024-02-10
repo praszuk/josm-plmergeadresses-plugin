@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="plmergeaddresses" default="dist" basedir=".">
+
+    <!-- <property name="plugin.icon" value="no.png"/> -->
+    <property name="plugin.description" value="Make merging Polish addresses with old_addr easier"/>
+    <property file="${basedir}/gradle.properties"/>
+
+    <import file="../build-common.xml"/>
+
+</project>
