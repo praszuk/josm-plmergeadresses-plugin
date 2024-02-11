@@ -7,6 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.openstreetmap.josm.actions.ExpertToggleAction;
 import org.openstreetmap.josm.command.ChangePropertyCommand;
+import org.openstreetmap.josm.command.Command;
 import org.openstreetmap.josm.data.UndoRedoHandler;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.osm.DataSet;
@@ -18,7 +19,8 @@ import org.openstreetmap.josm.testutils.JOSMTestRules;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
 
 public class MergeAddressesActionTest {
     @Rule
@@ -70,7 +72,7 @@ public class MergeAddressesActionTest {
 
         UndoRedoHandler.getInstance().add(new MergeAddressesAction().performMerge(dataSet));
 
-        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
     @Test
@@ -103,8 +105,13 @@ public class MergeAddressesActionTest {
                 "source:addr", "gmina.e-mapa.net"
         ).forEach(currentAddress::put);
 
-        new MergeAddressesAction().performMerge(dataSet).executeCommand();
+        Command command = new MergeAddressesAction().performMerge(dataSet);
+        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
+        command.executeCommand();
 
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
+
+        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(
             Map.of(
@@ -118,7 +125,7 @@ public class MergeAddressesActionTest {
                     "source:addr", "gugik.gov.pl"
             )
         );
-        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
     @Test
@@ -165,6 +172,6 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 }

@@ -14,7 +14,7 @@ dependencies {
 sourceSets {
     test {
         java {
-            srcDirs = ["test/integration", "test/unit"]
+            srcDirs = ["test/integration", "test/unit", "test/utils"]
         }
         resources {
             srcDirs = ["test/data"]
