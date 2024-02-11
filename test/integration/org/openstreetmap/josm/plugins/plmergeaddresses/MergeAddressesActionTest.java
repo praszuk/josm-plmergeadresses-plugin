@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNull;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
+import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.toTagList;
 
 public class MergeAddressesActionTest {
     @Rule
@@ -73,6 +74,48 @@ public class MergeAddressesActionTest {
         UndoRedoHandler.getInstance().add(new MergeAddressesAction().performMerge(dataSet));
 
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+
+    @Test
+    public void testUpdateAddressWithPlaceToStreetIncorrectSelectionOrderDoNothing() {
+        new MockUp<MergeAddressesCommand>(){
+            @Mock
+            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
+                new ChangePropertyCommand(
+                        newAddress.getDataSet(),
+                        Collections.singletonList(currentAddress),
+                        newAddress.getKeys()
+                ).executeCommand();
+                return true;
+            }
+        };
+        ExpertToggleAction.getInstance().setExpert(true);
+        Map<String, String> newAddressTags = Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gugik.gov.pl"
+        );
+        Map<String, String> currentAddressTags = Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "43A",
+                "addr:postcode", "00-000",
+                "source:addr", "gmina.e-mapa.net"
+        );
+        newAddressTags.forEach(newAddress::put);
+        currentAddressTags.forEach(currentAddress::put);
+
+        dataSet.clearSelection();
+        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
+        Command command = new MergeAddressesAction().performMerge(dataSet);
+        command.executeCommand();
+
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertTagListEquals(toTagList(currentAddressTags), currentAddress.getKeys().getTags());
+        assertTagListEquals(toTagList(newAddressTags), newAddress.getKeys().getTags());
     }
 
     @Test
