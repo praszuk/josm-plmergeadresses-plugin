@@ -22,12 +22,12 @@ public class MergeAddressesAction extends JosmAction {
             tr("Merge addresses with keeping part of history in old_addr tags"),
             Shortcut.registerShortcut(
                     tr("Merge addresses"),
-                    String.format("%s:merge_addresses", MergeAddressesPlugin.info.name),
+                    String.format("%s:merge_addresses", MergeAddressesPlugin.name),
                     KeyEvent.VK_G,
                     Shortcut.CTRL_SHIFT
             ),
             true,
-            String.format("%s:merge_addresses", MergeAddressesPlugin.info.name),
+            String.format("%s:merge_addresses", MergeAddressesPlugin.name),
             false
         );
     }

@@ -6,10 +6,9 @@ import org.openstreetmap.josm.plugins.Plugin;
 import org.openstreetmap.josm.plugins.PluginInformation;
 
 public class MergeAddressesPlugin extends Plugin {
-    static PluginInformation info;
+    public final static String name = "plmergeaddresses";
     public MergeAddressesPlugin(PluginInformation info){
         super(info);
-        MergeAddressesPlugin.info = info;
         MainMenu.add(MainApplication.getMenu().selectionMenu, new MergeAddressesAction());
     }
 }
