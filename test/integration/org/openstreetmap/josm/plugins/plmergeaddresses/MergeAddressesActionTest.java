@@ -6,8 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.openstreetmap.josm.actions.ExpertToggleAction;
 import org.openstreetmap.josm.command.ChangePropertyCommand;
-import org.openstreetmap.josm.command.SequenceCommand;
-import org.openstreetmap.josm.data.UndoRedoHandler;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.osm.DataSet;
 import org.openstreetmap.josm.data.osm.Node;
@@ -17,7 +15,6 @@ import org.openstreetmap.josm.testutils.JOSMTestRules;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 
@@ -66,7 +63,7 @@ public class MergeAddressesActionTest {
 
         dataSet.setSelected(src, dist);
 
-        new MergeAddressesAction().performMerge(dataSet);
+        new MergeAddressesAction().performMerge(dataSet).executeCommand();
 
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(
@@ -124,7 +121,7 @@ public class MergeAddressesActionTest {
 
         dataSet.setSelected(src, dist);
 
-        new MergeAddressesAction().performMerge(dataSet);
+        new MergeAddressesAction().performMerge(dataSet).executeCommand();
 
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(
@@ -139,8 +136,6 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        System.out.println(expectedTagMap.getTags());
-        System.out.println(dist.getKeys().getTags());
         assertTrue(expectedTagMap.getTags().containsAll(dist.getKeys().getTags()));
     }
 }
