@@ -5,7 +5,6 @@ import mockit.MockUp;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.openstreetmap.josm.actions.ExpertToggleAction;
 import org.openstreetmap.josm.command.ChangePropertyCommand;
 import org.openstreetmap.josm.data.UndoRedoHandler;
@@ -19,93 +18,90 @@ import org.openstreetmap.josm.testutils.JOSMTestRules;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MergeAddressesActionTest {
     @Rule
     public JOSMTestRules rules = new JOSMTestRules().main();
 
+    private DataSet dataSet;
+    private OsmPrimitive newAddress;
+    private OsmPrimitive currentAddress;
+
+
+    @Before
+    public void init(){
+        dataSet = new DataSet();
+        newAddress = new Node(new LatLon(52.23, 21.01124));
+        currentAddress = new Node(new LatLon(52.23, 21.01123));
+        currentAddress.setOsmId(1, 1);
+
+        dataSet.addPrimitive(newAddress);
+        dataSet.addPrimitive(currentAddress);
+
+        dataSet.setSelected(newAddress, currentAddress);
+    }
+
     @Test
     public void testUpdateCanceledByUser() {
         new MockUp<MergeAddressesCommand>(){
             @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive dist, OsmPrimitive src){
+            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
                 return false;
             }
         };
-
-        DataSet dataSet = new DataSet();
-        OsmPrimitive src = new Node(new LatLon(52.23, 21.01124));
-        OsmPrimitive dist = new Node(new LatLon(52.23, 21.01123));
-        dist.setOsmId(1, 1);
-
-        src.putAll(Map.of(
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
                 "addr:street", "Street",
                 "addr:housenumber", "1",
                 "addr:postcode", "00-000",
                 "source:addr", "gugik.gov.pl"
-        ));
-        dist.putAll(Map.of(
+        ).forEach(newAddress::put);
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:place", "Place",
                 "addr:housenumber", "43A",
                 "addr:postcode", "00-000",
                 "source:addr", "gmina.e-mapa.net"
-        ));
-        dataSet.addPrimitive(src);
-        dataSet.addPrimitive(dist);
+        ).forEach(currentAddress::put);
 
-        dataSet.setSelected(src, dist);
-
-        TagMap expectedTagMap = new TagMap(dist.getKeys());
+        TagMap expectedTagMap = new TagMap(currentAddress.getKeys());
 
         UndoRedoHandler.getInstance().add(new MergeAddressesAction().performMerge(dataSet));
 
-        assertTrue(expectedTagMap.getTags().containsAll(dist.getKeys().getTags()));
+        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
     }
 
     @Test
     public void testUpdateAddressWithPlaceToStreet() {
         new MockUp<MergeAddressesCommand>(){
             @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive dist, OsmPrimitive src){
+            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
                 new ChangePropertyCommand(
-                        src.getDataSet(),
-                        Collections.singletonList(dist),
-                        src.getKeys()
+                        newAddress.getDataSet(),
+                        Collections.singletonList(currentAddress),
+                        newAddress.getKeys()
                 ).executeCommand();
                 return true;
             }
         };
         ExpertToggleAction.getInstance().setExpert(true);
-
-        DataSet dataSet = new DataSet();
-        OsmPrimitive src = new Node(new LatLon(52.23, 21.01124));
-        OsmPrimitive dist = new Node(new LatLon(52.23, 21.01123));
-        dist.setOsmId(1, 1);
-
-        src.putAll(Map.of(
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
                 "addr:street", "Street",
                 "addr:housenumber", "1",
                 "addr:postcode", "00-000",
                 "source:addr", "gugik.gov.pl"
-        ));
-        dist.putAll(Map.of(
+        ).forEach(newAddress::put);
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:place", "Place",
                 "addr:housenumber", "43A",
                 "addr:postcode", "00-000",
                 "source:addr", "gmina.e-mapa.net"
-        ));
-        dataSet.addPrimitive(src);
-        dataSet.addPrimitive(dist);
-
-        dataSet.setSelected(src, dist);
+        ).forEach(currentAddress::put);
 
         new MergeAddressesAction().performMerge(dataSet).executeCommand();
 
@@ -122,49 +118,38 @@ public class MergeAddressesActionTest {
                     "source:addr", "gugik.gov.pl"
             )
         );
-        assertTrue(expectedTagMap.getTags().containsAll(dist.getKeys().getTags()));
+        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
     }
 
     @Test
     public void testUpdateAddressWithStreetToStreet() {
         new MockUp<MergeAddressesCommand>(){
             @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive dist, OsmPrimitive src){
+            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
                 new ChangePropertyCommand(
-                        src.getDataSet(),
-                        Collections.singletonList(dist),
-                        src.getKeys()
+                        newAddress.getDataSet(),
+                        Collections.singletonList(currentAddress),
+                        newAddress.getKeys()
                 ).executeCommand();
                 return true;
             }
         };
         ExpertToggleAction.getInstance().setExpert(true);
-
-        DataSet dataSet = new DataSet();
-        OsmPrimitive src = new Node(new LatLon(52.23, 21.01124));
-        OsmPrimitive dist = new Node(new LatLon(52.23, 21.01123));
-        dist.setOsmId(1, 1);
-
-        src.putAll(Map.of(
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
                 "addr:street", "Street2",
                 "addr:housenumber", "1",
                 "addr:postcode", "00-000",
                 "source:addr", "gugik.gov.pl"
-        ));
-        dist.putAll(Map.of(
+        ).forEach(newAddress::put);
+        Map.of(
                 "addr:city:simc", "12345",
                 "addr:street", "Street1",
                 "addr:housenumber", "43A",
                 "addr:postcode", "00-000",
                 "source:addr", "gmina.e-mapa.net"
-        ));
-        dataSet.addPrimitive(src);
-        dataSet.addPrimitive(dist);
-
-        dataSet.setSelected(src, dist);
-
+        ).forEach(currentAddress::put);
         new MergeAddressesAction().performMerge(dataSet).executeCommand();
 
         TagMap expectedTagMap = new TagMap();
@@ -180,6 +165,6 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertTrue(expectedTagMap.getTags().containsAll(dist.getKeys().getTags()));
+        assertTrue(expectedTagMap.getTags().containsAll(currentAddress.getKeys().getTags()));
     }
 }
