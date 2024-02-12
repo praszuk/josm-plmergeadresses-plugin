@@ -18,7 +18,7 @@ import org.openstreetmap.josm.testutils.JOSMTestRules;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
 
@@ -108,7 +108,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -147,7 +147,7 @@ public class MergeAddressesActionTest {
                     "source:addr", "gugik.gov.pl"
             )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -185,7 +185,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -223,7 +223,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -261,7 +261,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -299,12 +299,74 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+    @Test
+    public void testUpdateStreetToSameStreetSameHouseNumberNoChangeFallbackToUtilsPluginReplaceGeometry() {
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000"
+        ).forEach(newAddress::put);
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000"
+        ).forEach(currentAddress::put);
+
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(
+                Map.of(
+                        "addr:city:simc", "12345",
+                        "addr:city", "Place",
+                        "addr:street", "Street",
+                        "addr:housenumber", "1",
+                        "addr:postcode", "00-000"
+                )
+        );
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+    @Test
+    public void testUpdatePlaceToSamePlaceSameHouseNumberNoChangeFallbackToUtilsPluginReplaceGeometry() {
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000"
+        ).forEach(newAddress::put);
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000"
+        ).forEach(currentAddress::put);
+
+        dataSet.setSelected(newAddress, currentAddress);
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(
+                Map.of(
+                        "addr:city:simc", "12345",
+                        "addr:place", "Place",
+                        "addr:housenumber", "1",
+                        "addr:postcode", "00-000"
+                )
+        );
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
     @Test
-    public void testOnNoChangeTryToFallbackToUtilsPluginReplaceGeometry(){
+    public void testNoChangeFallbackToUtilsPluginReplaceGeometry(){
         ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
 
         Map.of("test2", "test2").forEach(newAddress::put);
@@ -315,7 +377,28 @@ public class MergeAddressesActionTest {
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(Map.of("test2", "test2", "test1", "test1"));
 
-        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+
+    @Test
+    public void testNoChangeFallbackToUtilsPluginReplaceGeometryCanceledByUser(){
+        new MockUp<MergeAddressesCommand>(){
+            @Mock
+            boolean fallbackToUtilsPluginResolver(OsmPrimitive currentAddress, OsmPrimitive newAddress){
+                return false;
+            }
+        };
+
+        Map.of("test2", "test2").forEach(newAddress::put);
+        Map.of("test2", "test1").forEach(currentAddress::put);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(currentAddress.getKeys());
+
+        new MergeAddressesAction().actionPerformed(null);
+
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 }
