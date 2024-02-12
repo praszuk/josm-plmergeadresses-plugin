@@ -42,7 +42,7 @@ It's actually wrapper for [utilsplugin2](https://wiki.openstreetmap.org/wiki/JOS
 
 
 ## How to use it
-Check the binding in the JOSM settings `plmergeaddresses:merge`, you can replace default utilsplugin shortcut `CTRL+SHIFT+G` – it should work well.
+Check the binding in the JOSM settings `plmergeaddresses:merge_addresses`, you can replace default utilsplugin shortcut `CTRL+SHIFT+G` – it should work well.
 Select 2 objects with addresses and press the shortcut.
 
 
