@@ -75,10 +75,6 @@ public class MergeAddressesCommand extends Command {
             updateAddrHousenumber(newAddress, currentAddress);
             updateSourceAddr(newAddress, currentAddress);
         }
-        else{
-            return false;
-        }
-
         if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {
             undoCommand();
             return false;

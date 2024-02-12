@@ -21,7 +21,6 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
-import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.toTagList;
 
 public class MergeAddressesActionTest {
     @Rule
@@ -75,37 +74,6 @@ public class MergeAddressesActionTest {
 
         assertNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
-    }
-
-    @Test
-    public void testUpdateAddressWithPlaceToStreetIncorrectSelectionOrderDoNothing() {
-        Map<String, String> newAddressTags = Map.of(
-                "addr:city:simc", "12345",
-                "addr:city", "Place",
-                "addr:street", "Street",
-                "addr:housenumber", "1",
-                "addr:postcode", "00-000",
-                "source:addr", "gugik.gov.pl"
-        );
-        Map<String, String> currentAddressTags = Map.of(
-                "addr:city:simc", "12345",
-                "addr:place", "Place",
-                "addr:housenumber", "43A",
-                "addr:postcode", "00-000",
-                "source:addr", "gmina.e-mapa.net"
-        );
-        newAddressTags.forEach(newAddress::put);
-        currentAddressTags.forEach(currentAddress::put);
-
-        dataSet.clearSelection();
-        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
-
-        new MergeAddressesAction().actionPerformed(null);
-
-
-        assertNull(UndoRedoHandler.getInstance().getLastCommand());
-        assertTagListEquals(toTagList(currentAddressTags), currentAddress.getKeys().getTags());
-        assertTagListEquals(toTagList(newAddressTags), newAddress.getKeys().getTags());
     }
 
     @Test
@@ -181,6 +149,21 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+    @Test
+    public void testOnNoChangeTryToFallbackToUtilsPluginReplaceGeometry(){
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
+
+        Map.of("test2", "test2").forEach(newAddress::put);
+        Map.of("test1", "test1").forEach(currentAddress::put);
+
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(Map.of("test2", "test2", "test1", "test1"));
+
         assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }

@@ -43,7 +43,10 @@ public class MergeAddressesAction extends JosmAction {
     public void actionPerformed(ActionEvent actionEvent) {
         DataSet dataSet = getLayerManager().getEditDataSet();
         Command mergeCommand = performMerge(dataSet);
-        if (mergeCommand != null && mergeCommand.executeCommand()){
+        if (mergeCommand == null){
+            return;
+        }
+        if (mergeCommand.executeCommand()){
             UndoRedoHandler.getInstance().add(mergeCommand, false);
         }
     }
