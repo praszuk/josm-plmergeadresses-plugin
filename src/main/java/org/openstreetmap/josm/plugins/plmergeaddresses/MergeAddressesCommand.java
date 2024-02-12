@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static org.openstreetmap.josm.tools.I18n.tr;
+
 public class MergeAddressesCommand extends Command {
     private final OsmPrimitive newAddress;
     private final OsmPrimitive currentAddress;
@@ -19,6 +21,11 @@ public class MergeAddressesCommand extends Command {
     private final TagMap currentAddressTags;
 
     private ReplaceGeometryCommand replaceCommand;
+    private ReplaceGeometryCommand utilsPluginFallbackCommand;
+    static final String COMMAND_DESCRIPTION = MergeAddressesPlugin.name + ": " + tr("Auto merge addresses");
+    static final String COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK = MergeAddressesPlugin.name + ": "  + tr(
+            "Auto merge addresses (with UtilsPlugin2)"
+    );
     static final MergeAddressCase[] mergeAddressCases = {
             new PlaceToSamePlaceNewHouseNumber(),
             new PlaceToStreetNewHouseNumber(),
@@ -35,6 +42,7 @@ public class MergeAddressesCommand extends Command {
         this.newAddressTags = new TagMap(this.newAddress.getKeys());
         this.currentAddressTags = new TagMap(this.currentAddress.getKeys());
         this.replaceCommand = null;
+        this.utilsPluginFallbackCommand = null;
     }
 
     @Override
@@ -45,11 +53,14 @@ public class MergeAddressesCommand extends Command {
 
     @Override
     public String getDescriptionText() {
-        return "Auto merge addresses";
+        return utilsPluginFallbackCommand != null ? COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK:COMMAND_DESCRIPTION;
     }
 
     @Override
     public void undoCommand() {
+        if (utilsPluginFallbackCommand != null){
+            utilsPluginFallbackCommand.undoCommand();
+        }
         if (replaceCommand != null){
             replaceCommand.undoCommand();
         }
@@ -95,17 +106,14 @@ public class MergeAddressesCommand extends Command {
                 return false;
             }
         } else { // No change by plugin login detected
-            if (!fallbackToUtilsPluginResolver()) {
-                undoCommand();
-                return false;
-            }
+            return fallbackToUtilsPluginResolver(newAddress, currentAddress);
         }
         return true;
     }
 
-    boolean fallbackToUtilsPluginResolver() {
-        replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
-        return replaceCommand.executeCommand();
+    boolean fallbackToUtilsPluginResolver(OsmPrimitive currentAddress, OsmPrimitive newAddress) {
+        utilsPluginFallbackCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+        return utilsPluginFallbackCommand != null && utilsPluginFallbackCommand.executeCommand();
     }
 
     void updateSourceAddr(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
