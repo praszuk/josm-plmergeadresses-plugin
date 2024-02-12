@@ -6,31 +6,30 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.openstreetmap.josm.actions.ExpertToggleAction;
-import org.openstreetmap.josm.command.ChangePropertyCommand;
-import org.openstreetmap.josm.command.Command;
 import org.openstreetmap.josm.data.UndoRedoHandler;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.osm.DataSet;
 import org.openstreetmap.josm.data.osm.Node;
 import org.openstreetmap.josm.data.osm.OsmPrimitive;
 import org.openstreetmap.josm.data.osm.TagMap;
+import org.openstreetmap.josm.gui.MainApplication;
+import org.openstreetmap.josm.gui.layer.OsmDataLayer;
 import org.openstreetmap.josm.testutils.JOSMTestRules;
 
-import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.toTagList;
 
 public class MergeAddressesActionTest {
     @Rule
-    public JOSMTestRules rules = new JOSMTestRules().main();
+    public JOSMTestRules rules = new JOSMTestRules().main().projection();
 
     private DataSet dataSet;
     private OsmPrimitive newAddress;
     private OsmPrimitive currentAddress;
-
 
     @Before
     public void init(){
@@ -43,6 +42,7 @@ public class MergeAddressesActionTest {
         dataSet.addPrimitive(currentAddress);
 
         dataSet.setSelected(newAddress, currentAddress);
+        MainApplication.getLayerManager().addLayer(new OsmDataLayer(dataSet, "Test", null));
     }
 
     @Test
@@ -71,25 +71,14 @@ public class MergeAddressesActionTest {
 
         TagMap expectedTagMap = new TagMap(currentAddress.getKeys());
 
-        UndoRedoHandler.getInstance().add(new MergeAddressesAction().performMerge(dataSet));
+        new MergeAddressesAction().actionPerformed(null);
 
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
     @Test
     public void testUpdateAddressWithPlaceToStreetIncorrectSelectionOrderDoNothing() {
-        new MockUp<MergeAddressesCommand>(){
-            @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
-                new ChangePropertyCommand(
-                        newAddress.getDataSet(),
-                        Collections.singletonList(currentAddress),
-                        newAddress.getKeys()
-                ).executeCommand();
-                return true;
-            }
-        };
-        ExpertToggleAction.getInstance().setExpert(true);
         Map<String, String> newAddressTags = Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
@@ -110,8 +99,9 @@ public class MergeAddressesActionTest {
 
         dataSet.clearSelection();
         dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
-        Command command = new MergeAddressesAction().performMerge(dataSet);
-        command.executeCommand();
+
+        new MergeAddressesAction().actionPerformed(null);
+
 
         assertNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(toTagList(currentAddressTags), currentAddress.getKeys().getTags());
@@ -120,18 +110,7 @@ public class MergeAddressesActionTest {
 
     @Test
     public void testUpdateAddressWithPlaceToStreet() {
-        new MockUp<MergeAddressesCommand>(){
-            @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
-                new ChangePropertyCommand(
-                        newAddress.getDataSet(),
-                        Collections.singletonList(currentAddress),
-                        newAddress.getKeys()
-                ).executeCommand();
-                return true;
-            }
-        };
-        ExpertToggleAction.getInstance().setExpert(true);
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
         Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
@@ -148,13 +127,9 @@ public class MergeAddressesActionTest {
                 "source:addr", "gmina.e-mapa.net"
         ).forEach(currentAddress::put);
 
-        Command command = new MergeAddressesAction().performMerge(dataSet);
-        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
-        command.executeCommand();
+        dataSet.setSelected(newAddress, currentAddress);
+        new MergeAddressesAction().actionPerformed(null);
 
-        assertNull(UndoRedoHandler.getInstance().getLastCommand());
-
-        dataSet.setSelected(currentAddress, newAddress); // Reversed order – should do nothing
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(
             Map.of(
@@ -168,23 +143,13 @@ public class MergeAddressesActionTest {
                     "source:addr", "gugik.gov.pl"
             )
         );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
     @Test
     public void testUpdateAddressWithStreetToStreet() {
-        new MockUp<MergeAddressesCommand>(){
-            @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
-                new ChangePropertyCommand(
-                        newAddress.getDataSet(),
-                        Collections.singletonList(currentAddress),
-                        newAddress.getKeys()
-                ).executeCommand();
-                return true;
-            }
-        };
-        ExpertToggleAction.getInstance().setExpert(true);
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
         Map.of(
                 "addr:city:simc", "12345",
                 "addr:city", "Place",
@@ -200,7 +165,8 @@ public class MergeAddressesActionTest {
                 "addr:postcode", "00-000",
                 "source:addr", "gmina.e-mapa.net"
         ).forEach(currentAddress::put);
-        new MergeAddressesAction().performMerge(dataSet).executeCommand();
+
+        new MergeAddressesAction().actionPerformed(null);
 
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(
@@ -215,6 +181,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 }
