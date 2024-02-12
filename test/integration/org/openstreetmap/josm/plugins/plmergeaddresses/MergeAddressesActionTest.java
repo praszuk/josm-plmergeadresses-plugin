@@ -76,6 +76,41 @@ public class MergeAddressesActionTest {
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
+    @Test
+    public void testUpdatePlaceToSamePlaceNewHouseNumber() {
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gugik.gov.pl"
+        ).forEach(newAddress::put);
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "43A",
+                "addr:postcode", "00-000",
+                "source:addr", "gmina.e-mapa.net"
+        ).forEach(currentAddress::put);
+
+        dataSet.setSelected(newAddress, currentAddress);
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(
+                Map.of(
+                        "addr:city:simc", "12345",
+                        "addr:place", "Place",
+                        "addr:housenumber", "1",
+                        "addr:postcode", "00-000",
+                        "old_addr:housenumber", "43A",
+                        "source:addr", "gugik.gov.pl"
+                )
+        );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
 
     @Test
     public void testUpdatePlaceToStreetNewHouseNumber() {

@@ -20,6 +20,7 @@ public class MergeAddressesCommand extends Command {
 
     private ReplaceGeometryCommand replaceCommand;
     static final MergeAddressCase[] mergeAddressCases = {
+            new PlaceToSamePlaceNewHouseNumber(),
             new PlaceToStreetNewHouseNumber(),
             new PlaceToStreetSameHouseNumber(),
             new StreetToNewStreetNewHouseNumber(),

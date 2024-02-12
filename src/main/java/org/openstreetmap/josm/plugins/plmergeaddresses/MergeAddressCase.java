@@ -51,7 +51,22 @@ class PlaceToStreetSameHouseNumber extends MergeAddressCase {
     }
 }
 
-//class PlaceToSamePlaceNewHouseNumber extends MergeAddressCase {}
+class PlaceToSamePlaceNewHouseNumber extends MergeAddressCase {
+
+    @Override
+    boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+
+        return currentAddress.get(ADDR_PLACE) != null && currentAddress.get(ADDR_PLACE).equals(newAddress.get(ADDR_PLACE)) && newAddress.get(ADDR_PLACE) != null &&
+                !currentAddress.get(ADDR_HOUSENUMBER).equals(newAddress.get(ADDR_HOUSENUMBER)) && newAddress.get(ADDR_HOUSENUMBER) != null;
+    }
+
+    @Override
+    void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+        currentAddress.put(OLD_ADDR_HOUSENUMBER, currentAddress.get(ADDR_HOUSENUMBER));
+        currentAddress.remove(ADDR_HOUSENUMBER);
+    }
+}
+
 class StreetToNewStreetNewHouseNumber extends MergeAddressCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
