@@ -19,6 +19,11 @@ public class MergeAddressesCommand extends Command {
     private final TagMap currentAddressTags;
 
     private ReplaceGeometryCommand replaceCommand;
+    static final MergeAddressCase[] mergeAddressCases = {
+            new PlaceToStreetNewHouseNumber(),
+            new PlaceToStreetSameHouseNumber(),
+            new StreetToNewStreetNewHouseNumber(),
+    };
 
     protected MergeAddressesCommand(DataSet data, OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         super(data);
@@ -61,34 +66,43 @@ public class MergeAddressesCommand extends Command {
         }
         return true;
     }
-    @Override
-    public boolean executeCommand() {
-        if (isPlaceToStreet(newAddress, currentAddress)){
-            currentAddress.put("old_addr:place", currentAddress.get("addr:place"));
-            currentAddress.remove("addr:place");
-            updateAddrHousenumber(newAddress, currentAddress);
-            updateSourceAddr(newAddress, currentAddress);
-        }
-        else if (isStreetToStreet(newAddress, currentAddress)){
-            currentAddress.put("old_addr:street", currentAddress.get("addr:street"));
-            currentAddress.remove("addr:street");
-            updateAddrHousenumber(newAddress, currentAddress);
-            updateSourceAddr(newAddress, currentAddress);
-        }
-        if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {
-            undoCommand();
-            return false;
-        }
-        replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
-        return replaceCommand.executeCommand();
+
+    private MergeAddressCase getMergeAddressCase(){
+        return Arrays.stream(mergeAddressCases)
+                .filter(mergeAddressCase -> mergeAddressCase.isMatch(newAddress, currentAddress))
+                .findFirst()
+                .orElse(null);
     }
 
-    void updateAddrHousenumber(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        if (newAddress.get("addr:housenumber").equals(currentAddress.get("addr:housenumber")))
-            return;
+    @Override
+    public boolean executeCommand() {
+        MergeAddressCase mergeAddressCase = getMergeAddressCase();
+        if (mergeAddressCase != null) {
+            mergeAddressCase.proceed(newAddress, currentAddress);
+            updateSourceAddr(newAddress, currentAddress);
+            if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {
+                undoCommand();
+                return false;
+            }
 
-        currentAddress.put("old_addr:housenumber", currentAddress.get("addr:housenumber"));
-        currentAddress.remove("addr:housenumber");
+            // below UtilsPlugin only replace geometry, because tags are already resolved above
+            replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+            if (!replaceCommand.executeCommand()) {
+                undoCommand();
+                return false;
+            }
+        } else { // No change by plugin login detected
+            if (!fallbackToUtilsPluginResolver()) {
+                undoCommand();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean fallbackToUtilsPluginResolver() {
+        replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+        return replaceCommand.executeCommand();
     }
 
     void updateSourceAddr(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
@@ -96,14 +110,6 @@ public class MergeAddressesCommand extends Command {
             return;
 
         currentAddress.put("source:addr", newAddress.get("source:addr"));
-    }
-
-    private boolean isPlaceToStreet(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        return newAddress.hasTag("addr:street") && currentAddress.hasTag("addr:place") && !currentAddress.hasTag("addr:street");
-    }
-
-    private boolean isStreetToStreet(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        return newAddress.hasTag("addr:street") && currentAddress.hasTag("addr:street") && !currentAddress.get("addr:street").equals(newAddress.get("addr:street"));
     }
 
 }

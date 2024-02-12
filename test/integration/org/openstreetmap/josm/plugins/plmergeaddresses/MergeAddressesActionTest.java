@@ -76,8 +76,9 @@ public class MergeAddressesActionTest {
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
+
     @Test
-    public void testUpdateAddressWithPlaceToStreet() {
+    public void testUpdatePlaceToStreetNewHouseNumber() {
         ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
         Map.of(
                 "addr:city:simc", "12345",
@@ -116,7 +117,7 @@ public class MergeAddressesActionTest {
     }
 
     @Test
-    public void testUpdateAddressWithStreetToStreet() {
+    public void testUpdateStreetToNewStreetNewHouseNumber() {
         ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
         Map.of(
                 "addr:city:simc", "12345",
