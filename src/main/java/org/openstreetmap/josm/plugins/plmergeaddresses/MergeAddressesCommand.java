@@ -24,6 +24,7 @@ public class MergeAddressesCommand extends Command {
             new PlaceToStreetNewHouseNumber(),
             new PlaceToStreetSameHouseNumber(),
             new StreetToNewStreetNewHouseNumber(),
+            new StreetToNewStreetSameHouseNumber(),
             new StreetToSameStreetNewHouseNumber(),
     };
 

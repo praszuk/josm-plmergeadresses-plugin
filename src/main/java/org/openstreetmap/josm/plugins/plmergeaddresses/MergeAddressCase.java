@@ -85,6 +85,22 @@ class StreetToNewStreetNewHouseNumber extends MergeAddressCase {
         currentAddress.remove(ADDR_HOUSENUMBER);
     }
 }
+
+class StreetToNewStreetSameHouseNumber extends MergeAddressCase {
+    @Override
+    boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+        return currentAddress.hasTag(ADDR_STREET) &&
+                newAddress.hasTag(ADDR_STREET) &&
+                !currentAddress.get(ADDR_STREET).equals(newAddress.get(ADDR_STREET)) && newAddress.get(ADDR_STREET) != null &&
+                currentAddress.get(ADDR_HOUSENUMBER).equals(newAddress.get(ADDR_HOUSENUMBER)) && newAddress.get(ADDR_HOUSENUMBER) != null;
+    }
+
+    @Override
+    void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+        currentAddress.put(OLD_ADDR_STREET, currentAddress.get(ADDR_STREET));
+        currentAddress.remove(ADDR_STREET);
+    }
+}
 class StreetToSameStreetNewHouseNumber extends MergeAddressCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {

@@ -190,6 +190,44 @@ public class MergeAddressesActionTest {
     }
 
     @Test
+    public void testUpdateStreetToNewStreetSameHouseNumber() {
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street2",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gugik.gov.pl"
+        ).forEach(newAddress::put);
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street1",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gmina.e-mapa.net"
+        ).forEach(currentAddress::put);
+
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(
+                Map.of(
+                        "addr:city:simc", "12345",
+                        "addr:city", "Place",
+                        "addr:street", "Street2",
+                        "addr:housenumber", "1",
+                        "addr:postcode", "00-000",
+                        "old_addr:street", "Street1",
+                        "source:addr", "gugik.gov.pl"
+                )
+        );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+
+    @Test
     public void testUpdateStreetToSameStreetNewHouseNumber() {
         ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
         Map.of(
