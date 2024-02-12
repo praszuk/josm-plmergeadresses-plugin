@@ -23,6 +23,7 @@ public class MergeAddressesCommand extends Command {
             new PlaceToStreetNewHouseNumber(),
             new PlaceToStreetSameHouseNumber(),
             new StreetToNewStreetNewHouseNumber(),
+            new StreetToSameStreetNewHouseNumber(),
     };
 
     protected MergeAddressesCommand(DataSet data, OsmPrimitive newAddress, OsmPrimitive currentAddress) {

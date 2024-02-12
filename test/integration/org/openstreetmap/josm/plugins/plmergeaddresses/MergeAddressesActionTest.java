@@ -24,7 +24,7 @@ import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTa
 
 public class MergeAddressesActionTest {
     @Rule
-    public JOSMTestRules rules = new JOSMTestRules().main().projection();
+    public JOSMTestRules rules = new JOSMTestRules().main().projection().timeout(5000);
 
     private DataSet dataSet;
     private OsmPrimitive newAddress;
@@ -153,6 +153,45 @@ public class MergeAddressesActionTest {
         assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
+
+    @Test
+    public void testUpdateStreetToSameStreetNewHouseNumber() {
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "5",
+                "addr:postcode", "00-000",
+                "source:addr", "gugik.gov.pl"
+        ).forEach(newAddress::put);
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gmina.e-mapa.net"
+        ).forEach(currentAddress::put);
+
+        new MergeAddressesAction().actionPerformed(null);
+
+        TagMap expectedTagMap = new TagMap();
+        expectedTagMap.putAll(
+                Map.of(
+                        "addr:city:simc", "12345",
+                        "addr:city", "Place",
+                        "addr:street", "Street",
+                        "addr:housenumber", "5",
+                        "old_addr:housenumber", "1",
+                        "addr:postcode", "00-000",
+                        "source:addr", "gugik.gov.pl"
+                )
+        );
+        assertNotNull(UndoRedoHandler.getInstance().getLastCommand());
+        assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+
     @Test
     public void testOnNoChangeTryToFallbackToUtilsPluginReplaceGeometry(){
         ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
