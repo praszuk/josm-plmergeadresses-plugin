@@ -72,7 +72,7 @@ public class MergeAddressesCommand extends Command {
         currentAddress.setKeys(currentAddressTags);
     }
 
-    boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
+    boolean mergeTagsAndResolveConflicts(OsmPrimitive newAddress, OsmPrimitive currentAddress){
         Collection<OsmPrimitive> primitives = Arrays.asList(currentAddress, newAddress);
         TagCollection tagsOfPrimitives = TagCollection.unionOfAllPrimitives(primitives);
         try {
@@ -98,7 +98,7 @@ public class MergeAddressesCommand extends Command {
             mergeAddressesCase.proceed(newAddress, currentAddress);
             new SourceAddrReplace().isMatchThenProceed(newAddress, currentAddress);
 
-            if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {
+            if (!mergeTagsAndResolveConflicts(newAddress, currentAddress)) {
                 undoCommand();
                 return false;
             }
@@ -110,12 +110,12 @@ public class MergeAddressesCommand extends Command {
                 return false;
             }
         } else { // No change by plugin login detected
-            return fallbackToUtilsPluginResolver(currentAddress, newAddress);
+            return fallbackToUtilsPluginResolver(newAddress, currentAddress);
         }
         return true;
     }
 
-    boolean fallbackToUtilsPluginResolver(OsmPrimitive currentAddress, OsmPrimitive newAddress) {
+    boolean fallbackToUtilsPluginResolver(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         utilsPluginFallbackCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
         return utilsPluginFallbackCommand != null && utilsPluginFallbackCommand.executeCommand();
     }

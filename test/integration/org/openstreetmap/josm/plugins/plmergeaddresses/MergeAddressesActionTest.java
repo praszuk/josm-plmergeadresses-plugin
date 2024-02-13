@@ -48,7 +48,7 @@ public class MergeAddressesActionTest {
     public void testUpdateCanceledByUser() {
         new MockUp<MergeAddressesCommand>(){
             @Mock
-            boolean mergeTagsAndResolveConflicts(OsmPrimitive currentAddress, OsmPrimitive newAddress){
+            boolean mergeTagsAndResolveConflicts(OsmPrimitive newAddress, OsmPrimitive currentAddress){
                 return false;
             }
         };
@@ -385,7 +385,7 @@ public class MergeAddressesActionTest {
     public void testNoChangeFallbackToUtilsPluginReplaceGeometryCanceledByUser(){
         new MockUp<MergeAddressesCommand>(){
             @Mock
-            boolean fallbackToUtilsPluginResolver(OsmPrimitive currentAddress, OsmPrimitive newAddress){
+            boolean fallbackToUtilsPluginResolver(OsmPrimitive newAddress, OsmPrimitive currentAddress){
                 return false;
             }
         };
