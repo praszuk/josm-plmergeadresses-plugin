@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static org.openstreetmap.josm.plugins.plmergeaddresses.Tags.SOURCE_ADDR;
 import static org.openstreetmap.josm.tools.I18n.tr;
 
 public class MergeAddressesCommand extends Command {
@@ -117,10 +118,10 @@ public class MergeAddressesCommand extends Command {
     }
 
     void updateSourceAddr(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        if (newAddress.hasTag("source:addr") && newAddress.get("source:addr").equals(currentAddress.get("source:addr")))
+        if (newAddress.hasTag(SOURCE_ADDR) && newAddress.get(SOURCE_ADDR).equals(currentAddress.get(SOURCE_ADDR)))
             return;
 
-        currentAddress.put("source:addr", newAddress.get("source:addr"));
+        currentAddress.put(SOURCE_ADDR, newAddress.get(SOURCE_ADDR));
     }
 
 }

@@ -2,14 +2,9 @@ package org.openstreetmap.josm.plugins.plmergeaddresses;
 
 import org.openstreetmap.josm.data.osm.OsmPrimitive;
 
-abstract public class MergeAddressCase {
-    static final String ADDR_PLACE = "addr:place";
-    static final String ADDR_STREET = "addr:street";
-    static final String ADDR_HOUSENUMBER = "addr:housenumber";
-    static final String OLD_ADDR_PLACE = "old_addr:place";
-    static final String OLD_ADDR_STREET = "old_addr:street";
-    static final String OLD_ADDR_HOUSENUMBER = "old_addr:housenumber";
+import static org.openstreetmap.josm.plugins.plmergeaddresses.Tags.*;
 
+abstract public class MergeAddressCase {
     abstract boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress);
     abstract void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress);
 
