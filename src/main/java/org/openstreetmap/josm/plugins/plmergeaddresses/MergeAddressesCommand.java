@@ -1,7 +1,10 @@
 package org.openstreetmap.josm.plugins.plmergeaddresses;
 
 import org.openstreetmap.josm.command.Command;
-import org.openstreetmap.josm.data.osm.*;
+import org.openstreetmap.josm.data.osm.DataSet;
+import org.openstreetmap.josm.data.osm.OsmPrimitive;
+import org.openstreetmap.josm.data.osm.TagCollection;
+import org.openstreetmap.josm.data.osm.TagMap;
 import org.openstreetmap.josm.gui.conflict.tags.CombinePrimitiveResolverDialog;
 import org.openstreetmap.josm.plugins.utilsplugin2.replacegeometry.ReplaceGeometryCommand;
 import org.openstreetmap.josm.plugins.utilsplugin2.replacegeometry.ReplaceGeometryUtils;
@@ -12,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.openstreetmap.josm.plugins.plmergeaddresses.Tags.SOURCE_ADDR;
 import static org.openstreetmap.josm.tools.I18n.tr;
 
 public class MergeAddressesCommand extends Command {
@@ -94,7 +96,8 @@ public class MergeAddressesCommand extends Command {
         MergeAddressCase mergeAddressCase = getMergeAddressCase();
         if (mergeAddressCase != null) {
             mergeAddressCase.proceed(newAddress, currentAddress);
-            updateSourceAddr(newAddress, currentAddress);
+            new SourceAddrReplace().isMatchThenProceed(newAddress, currentAddress);
+
             if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {
                 undoCommand();
                 return false;
@@ -116,12 +119,4 @@ public class MergeAddressesCommand extends Command {
         utilsPluginFallbackCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
         return utilsPluginFallbackCommand != null && utilsPluginFallbackCommand.executeCommand();
     }
-
-    void updateSourceAddr(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        if (newAddress.hasTag(SOURCE_ADDR) && newAddress.get(SOURCE_ADDR).equals(currentAddress.get(SOURCE_ADDR)))
-            return;
-
-        currentAddress.put(SOURCE_ADDR, newAddress.get(SOURCE_ADDR));
-    }
-
 }

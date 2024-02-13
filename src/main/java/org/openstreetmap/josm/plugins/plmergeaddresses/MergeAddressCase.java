@@ -8,6 +8,12 @@ abstract public class MergeAddressCase {
     abstract boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress);
     abstract void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress);
 
+    void isMatchThenProceed(OsmPrimitive newAddress, OsmPrimitive currentAddress){
+        if (isMatch(newAddress, currentAddress)){
+            proceed(newAddress, currentAddress);
+        }
+    }
+
     static boolean haveTagKey(OsmPrimitive first, OsmPrimitive second, String key){
         return first.hasTag(key) && second.hasTag(key);
     }
@@ -113,5 +119,18 @@ class StreetToSameStreetNewHouseNumber extends MergeAddressCase {
     void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         currentAddress.put(OLD_ADDR_HOUSENUMBER, currentAddress.get(ADDR_HOUSENUMBER));
         currentAddress.remove(ADDR_HOUSENUMBER);
+    }
+}
+
+class SourceAddrReplace extends MergeAddressCase {
+
+    @Override
+    boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+        return haveTagKey(currentAddress, newAddress, SOURCE_ADDR);
+    }
+
+    @Override
+    void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
+        currentAddress.put(SOURCE_ADDR, newAddress.get(SOURCE_ADDR));
     }
 }
