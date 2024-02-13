@@ -108,7 +108,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -147,7 +147,7 @@ public class MergeAddressesActionTest {
                     "source:addr", "gugik.gov.pl"
             )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -185,7 +185,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -223,7 +223,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -261,7 +261,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -299,7 +299,7 @@ public class MergeAddressesActionTest {
                         "source:addr", "gugik.gov.pl"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
     @Test
@@ -331,7 +331,7 @@ public class MergeAddressesActionTest {
                         "addr:postcode", "00-000"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
     @Test
@@ -361,7 +361,7 @@ public class MergeAddressesActionTest {
                         "addr:postcode", "00-000"
                 )
         );
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
@@ -377,7 +377,7 @@ public class MergeAddressesActionTest {
         TagMap expectedTagMap = new TagMap();
         expectedTagMap.putAll(Map.of("test2", "test2", "test1", "test1"));
 
-        assertEquals(UndoRedoHandler.getInstance().getLastCommand().getDescriptionText(), MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK);
+        assertEquals(MergeAddressesCommand.COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK, UndoRedoHandler.getInstance().getLastCommand().getDescriptionText());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
     }
 
