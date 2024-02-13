@@ -106,7 +106,7 @@ public class MergeAddressesCommand extends Command {
                 return false;
             }
         } else { // No change by plugin login detected
-            return fallbackToUtilsPluginResolver(newAddress, currentAddress);
+            return fallbackToUtilsPluginResolver(currentAddress, newAddress);
         }
         return true;
     }
