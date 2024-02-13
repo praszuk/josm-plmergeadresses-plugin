@@ -29,7 +29,7 @@ public class MergeAddressesCommand extends Command {
     static final String COMMAND_DESCRIPTION_UTILS_PLUGIN_FALLBACK = MergeAddressesPlugin.name + ": "  + tr(
             "Auto merge addresses (with UtilsPlugin2)"
     );
-    static final MergeAddressCase[] mergeAddressCases = {
+    static final MergeAddressesCase[] MERGE_ADDRESSES_CASES = {
             new PlaceToSamePlaceNewHouseNumber(),
             new PlaceToStreetNewHouseNumber(),
             new PlaceToStreetSameHouseNumber(),
@@ -84,18 +84,18 @@ public class MergeAddressesCommand extends Command {
         return true;
     }
 
-    private MergeAddressCase getMergeAddressCase(){
-        return Arrays.stream(mergeAddressCases)
-                .filter(mergeAddressCase -> mergeAddressCase.isMatch(newAddress, currentAddress))
+    private MergeAddressesCase getMergeAddressCase(){
+        return Arrays.stream(MERGE_ADDRESSES_CASES)
+                .filter(mergeAddressesCase -> mergeAddressesCase.isMatch(newAddress, currentAddress))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public boolean executeCommand() {
-        MergeAddressCase mergeAddressCase = getMergeAddressCase();
-        if (mergeAddressCase != null) {
-            mergeAddressCase.proceed(newAddress, currentAddress);
+        MergeAddressesCase mergeAddressesCase = getMergeAddressCase();
+        if (mergeAddressesCase != null) {
+            mergeAddressesCase.proceed(newAddress, currentAddress);
             new SourceAddrReplace().isMatchThenProceed(newAddress, currentAddress);
 
             if (!mergeTagsAndResolveConflicts(currentAddress, newAddress)) {

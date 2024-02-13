@@ -4,7 +4,7 @@ import org.openstreetmap.josm.data.osm.OsmPrimitive;
 
 import static org.openstreetmap.josm.plugins.plmergeaddresses.Tags.*;
 
-abstract public class MergeAddressCase {
+abstract public class MergeAddressesCase {
     abstract boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress);
     abstract void proceed(OsmPrimitive newAddress, OsmPrimitive currentAddress);
 
@@ -24,7 +24,7 @@ abstract public class MergeAddressCase {
 
 
 
-class PlaceToStreetNewHouseNumber extends MergeAddressCase {
+class PlaceToStreetNewHouseNumber extends MergeAddressesCase {
 
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
@@ -43,7 +43,7 @@ class PlaceToStreetNewHouseNumber extends MergeAddressCase {
     }
 }
 
-class PlaceToStreetSameHouseNumber extends MergeAddressCase {
+class PlaceToStreetSameHouseNumber extends MergeAddressesCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         return currentAddress.hasTag(ADDR_PLACE) &&
@@ -59,7 +59,7 @@ class PlaceToStreetSameHouseNumber extends MergeAddressCase {
     }
 }
 
-class PlaceToSamePlaceNewHouseNumber extends MergeAddressCase {
+class PlaceToSamePlaceNewHouseNumber extends MergeAddressesCase {
 
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
@@ -75,7 +75,7 @@ class PlaceToSamePlaceNewHouseNumber extends MergeAddressCase {
     }
 }
 
-class StreetToNewStreetNewHouseNumber extends MergeAddressCase {
+class StreetToNewStreetNewHouseNumber extends MergeAddressesCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         return haveTagKey(currentAddress, newAddress, ADDR_STREET) &&
@@ -93,7 +93,7 @@ class StreetToNewStreetNewHouseNumber extends MergeAddressCase {
     }
 }
 
-class StreetToNewStreetSameHouseNumber extends MergeAddressCase {
+class StreetToNewStreetSameHouseNumber extends MergeAddressesCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         return haveTagKey(currentAddress, newAddress, ADDR_STREET) &&
@@ -107,7 +107,7 @@ class StreetToNewStreetSameHouseNumber extends MergeAddressCase {
         currentAddress.remove(ADDR_STREET);
     }
 }
-class StreetToSameStreetNewHouseNumber extends MergeAddressCase {
+class StreetToSameStreetNewHouseNumber extends MergeAddressesCase {
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
         return haveTagKey(currentAddress, newAddress, ADDR_STREET) &&
@@ -122,7 +122,7 @@ class StreetToSameStreetNewHouseNumber extends MergeAddressCase {
     }
 }
 
-class SourceAddrReplace extends MergeAddressCase {
+class SourceAddrReplace extends MergeAddressesCase {
 
     @Override
     boolean isMatch(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
