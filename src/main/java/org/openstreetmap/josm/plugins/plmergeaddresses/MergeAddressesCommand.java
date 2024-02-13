@@ -117,7 +117,7 @@ public class MergeAddressesCommand extends Command {
     }
 
     void updateSourceAddr(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        if (newAddress.get("source:addr").equals(currentAddress.get("source:addr")))
+        if (newAddress.hasTag("source:addr") && newAddress.get("source:addr").equals(currentAddress.get("source:addr")))
             return;
 
         currentAddress.put("source:addr", newAddress.get("source:addr"));
