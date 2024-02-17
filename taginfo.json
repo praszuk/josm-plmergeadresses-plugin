@@ -1,0 +1,71 @@
+{
+  "data_format": 1,
+  "data_url": "https://raw.githubusercontent.com/praszuk/josm-plmergeadresses-plugin/master/taginfo.json",
+  "data_updated": "20240217T210400Z",
+  "project": {
+    "name": "josm_plmergeaddresses_plugin",
+    "description": "Make merging Polish addresses with old_addr easier.",
+    "project_url": "https://github.com/praszuk/josm-plmergeadresses-plugin",
+    "doc_url": "https://github.com/praszuk/josm-plmergeadresses-plugin",
+    "contact_name": "NieWnen",
+    "contact_email": "niewnen@gmail.com"
+  },
+  "tags": [
+    {
+      "key": "addr:place",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "addr:street",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "addr:housenumber",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "old_addr:place",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "old_addr:street",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "old_addr:housenumber",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    },
+    {
+      "key": "source:addr",
+      "object_types": [
+        "node",
+        "way",
+        "area"
+      ]
+    }
+  ]
+}
