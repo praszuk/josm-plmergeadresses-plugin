@@ -45,6 +45,9 @@ It's actually wrapper for [utilsplugin2](https://wiki.openstreetmap.org/wiki/JOS
 Check the binding in the JOSM settings `plmergeaddresses:merge_addresses`, you can replace default UtilsPlugin2 shortcut `CTRL+SHIFT+G` – it should work well.
 Select 2 objects with addresses and press the shortcut.
 
+**Note: order of selection matters!**<br>
+The First object will be merged to second, so the 1st object should be "new address" and the 2nd "old address".
+
 ## Supported cases
 - `addr:place` to the same `addr:place` with new `addr:housenumber`
 - `addr:place` to `addr:street` with new `addr:housenumber`

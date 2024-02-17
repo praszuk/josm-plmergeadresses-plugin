@@ -43,6 +43,9 @@ Jest to w zasadzie nakładka na wtyczkę [utilsplugin2](https://wiki.openstreetm
 Sprawdź skrót w ustawieniach JOSMa pod nazwą `plmergeaddresses:merge_addresses`. Możesz zastąpić go domyślnym skrótem z UtilsPlugin2 `CTRL+SHIFT+G` – powinno to działać poprawnie.  
 Zaznacz 2 obiekty z adresami i użyj skrótu klawiszowego.
 
+**Uwaga: kolejność zaznaczania ma znaczenie!**<br>
+Pierwszy obiekt będzie scalany do drugiego, czyli pierwszym obiektem powinien być "nowy adres", a drugim "stary adres".
+
 ## Obsługiwane przypadki
 - `addr:place` do tego samego `addr:place` z nowym `addr:housenumber`
 - `addr:place` do `addr:street` z nowym `addr:housenumber`
