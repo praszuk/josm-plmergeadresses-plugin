@@ -8,11 +8,14 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 public class TestUtils {
-
+    static int existingPrimitiveId = 1;
     static void assertTagListEquals(List<Tag> expected, List<Tag> actual){
         assertEquals(
                 expected.stream().map(tag -> tag.getKey() + '=' + tag.getValue()).sorted().collect(Collectors.toList()),
                 actual.stream().map(tag -> tag.getKey() + '=' + tag.getValue()).sorted().collect(Collectors.toList())
         );
+    }
+    static int getNextId(){
+        return ++existingPrimitiveId;
     }
 }

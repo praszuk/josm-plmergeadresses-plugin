@@ -8,19 +8,19 @@ import org.junit.Test;
 import org.openstreetmap.josm.actions.ExpertToggleAction;
 import org.openstreetmap.josm.data.UndoRedoHandler;
 import org.openstreetmap.josm.data.coor.LatLon;
-import org.openstreetmap.josm.data.osm.DataSet;
-import org.openstreetmap.josm.data.osm.Node;
-import org.openstreetmap.josm.data.osm.OsmPrimitive;
-import org.openstreetmap.josm.data.osm.TagMap;
+import org.openstreetmap.josm.data.osm.*;
 import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.layer.OsmDataLayer;
 import org.openstreetmap.josm.testutils.JOSMTestRules;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.assertTagListEquals;
+import static org.openstreetmap.josm.plugins.plmergeaddresses.TestUtils.getNextId;
 
 public class MergeAddressesActionTest {
     @Rule
@@ -35,7 +35,7 @@ public class MergeAddressesActionTest {
         dataSet = new DataSet();
         newAddress = new Node(new LatLon(52.23, 21.01124));
         currentAddress = new Node(new LatLon(52.23, 21.01123));
-        currentAddress.setOsmId(1, 1);
+        currentAddress.setOsmId(getNextId(), 1);
 
         dataSet.addPrimitive(newAddress);
         dataSet.addPrimitive(currentAddress);
@@ -400,5 +400,67 @@ public class MergeAddressesActionTest {
 
         assertNull(UndoRedoHandler.getInstance().getLastCommand());
         assertTagListEquals(expectedTagMap.getTags(), currentAddress.getKeys().getTags());
+    }
+    @Test
+    public void testNoChangeFallbackToUtilsPluginInvalidAttemptHandledReplaceGeometryException(){
+        Way building = new Way(getNextId());
+        building.put("building", "yes");
+        dataSet.addPrimitive(building);
+
+        ArrayList<Node> nodes = new ArrayList<>(List.of(new Node(new LatLon(52.23, 21.01123)),
+                new Node(new LatLon(52.24, 21.01243)),
+                new Node(new LatLon(52.23, 21.0153))));
+
+        for (Node node : nodes){
+            node.setOsmId(getNextId(), 1);
+            dataSet.addPrimitive(node);
+        }
+        nodes.add(nodes.get(0));
+        building.setNodes(nodes);
+
+        dataSet.setSelected(nodes.get(0), building);
+
+        new MergeAddressesAction().actionPerformed(null);
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
+    }
+    @Test
+    public void testPlaceToStreetButNodeBelongToWayInvalidAttemptHandledReplaceGeometryException(){
+        ExpertToggleAction.getInstance().setExpert(true);  // avoid asking about merging obvious tags
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:city", "Place",
+                "addr:street", "Street",
+                "addr:housenumber", "1",
+                "addr:postcode", "00-000",
+                "source:addr", "gugik.gov.pl"
+        ).forEach(newAddress::put);
+
+        Way building = new Way(getNextId());
+        Map.of(
+                "addr:city:simc", "12345",
+                "addr:place", "Place",
+                "addr:housenumber", "43A",
+                "addr:postcode", "00-000",
+                "source:addr", "gmina.e-mapa.net",
+                "building","yes"
+        ).forEach(building::put);
+
+        dataSet.addPrimitive(building);
+
+        ArrayList<Node> nodes = new ArrayList<>(List.of(new Node(new LatLon(52.24, 21.01243)),
+                new Node(new LatLon(52.23, 21.0153))));
+
+        for (Node node : nodes){
+            node.setOsmId(getNextId(), 1);
+            dataSet.addPrimitive(node);
+        }
+        nodes.add(0, (Node) newAddress);
+        nodes.add((Node) newAddress);
+        building.setNodes(nodes);
+
+        dataSet.setSelected(newAddress, building);
+
+        new MergeAddressesAction().actionPerformed(null);
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
     }
 }
