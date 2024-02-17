@@ -463,4 +463,17 @@ public class MergeAddressesActionTest {
         new MergeAddressesAction().actionPerformed(null);
         assertNull(UndoRedoHandler.getInstance().getLastCommand());
     }
+    @Test
+    public void testNoActionOnInvalidSelectionOfRelations(){
+        Relation relation1 = new Relation(getNextId());
+        Relation relation2 = new Relation(getNextId());
+
+        dataSet.addPrimitive(relation1);
+        dataSet.addPrimitive(relation2);
+
+        dataSet.setSelected(relation1, relation2);
+
+        new MergeAddressesAction().actionPerformed(null);
+        assertNull(UndoRedoHandler.getInstance().getLastCommand());
+    }
 }
