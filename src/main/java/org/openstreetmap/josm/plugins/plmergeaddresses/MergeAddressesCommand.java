@@ -5,11 +5,14 @@ import org.openstreetmap.josm.data.osm.DataSet;
 import org.openstreetmap.josm.data.osm.OsmPrimitive;
 import org.openstreetmap.josm.data.osm.TagCollection;
 import org.openstreetmap.josm.data.osm.TagMap;
+import org.openstreetmap.josm.gui.Notification;
 import org.openstreetmap.josm.gui.conflict.tags.CombinePrimitiveResolverDialog;
 import org.openstreetmap.josm.plugins.utilsplugin2.replacegeometry.ReplaceGeometryCommand;
+import org.openstreetmap.josm.plugins.utilsplugin2.replacegeometry.ReplaceGeometryException;
 import org.openstreetmap.josm.plugins.utilsplugin2.replacegeometry.ReplaceGeometryUtils;
 import org.openstreetmap.josm.tools.UserCancelException;
 
+import javax.swing.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -104,11 +107,18 @@ public class MergeAddressesCommand extends Command {
             }
 
             // below UtilsPlugin only replace geometry, because tags are already resolved above
-            replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+            try {
+                replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+            } catch (ReplaceGeometryException exc){
+                new Notification(exc.getMessage()).setIcon(UIManager.getIcon("OptionPane.warningIcon")).show();
+                undoCommand();
+                return false;
+            }
             if (!replaceCommand.executeCommand()) {
                 undoCommand();
                 return false;
             }
+
         } else { // No change by plugin login detected
             return fallbackToUtilsPluginResolver(newAddress, currentAddress);
         }
@@ -116,7 +126,12 @@ public class MergeAddressesCommand extends Command {
     }
 
     boolean fallbackToUtilsPluginResolver(OsmPrimitive newAddress, OsmPrimitive currentAddress) {
-        utilsPluginFallbackCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+        try {
+            utilsPluginFallbackCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(newAddress, currentAddress);
+        } catch (ReplaceGeometryException exc){
+            new Notification(exc.getMessage()).setIcon(UIManager.getIcon("OptionPane.warningIcon")).show();
+            return false;
+        }
         return utilsPluginFallbackCommand != null && utilsPluginFallbackCommand.executeCommand();
     }
 }
